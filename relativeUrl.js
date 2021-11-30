@@ -1,18 +1,28 @@
 const path = require('path');
 const urlFilter = require("@11ty/eleventy/src/Filters/Url");
 
-let currentPath;
+const indexify = url => url.replace(/(\/[^.]*)$/, '$1index.html');
 
-exports.setCurrentPath = p => { currentPath = p; return ''; };
-
-exports.urlRelativeToCurrentPath = (url, pathPrefix = undefined) => {
-  if (currentPath === undefined || pathPrefix !== undefined) {
+exports.urlMaybeRelative = (url, pathPrefixOrPage = '/') => {
+  if (typeof pathPrefixOrPage === 'string' || !pathPrefixOrPage) {
+    const pathPrefix = pathPrefixOrPage;
+    console.log('absolute url set for', url, pathPrefix);
     return urlFilter(url, pathPrefix);
   }
-  url = urlFilter(url, '/');
-  const u = new URL(url, 'make-relative://');
-  if (u.protocol !== 'make-relative:') {
-    return url;
+  const currentDir = pathPrefixOrPage.url;
+  if (typeof currentDir !== 'string')  {
+    throw new Error('urlMaybeRelative: page.url is not a string');
   }
-  return `${path.relative(currentPath, u.pathname) || '.'}`;
+  url = urlFilter(url, '/');
+  // Make sure the index.html is expressed.
+  const indexUrl = indexify(url);
+  const u = new URL(indexUrl, 'make-relative://');
+  if (u.protocol !== 'make-relative:') {
+    return indexUrl;
+  }
+  const relativePath = `${path.relative(currentDir, u.pathname) || 'index.html'}`
+  // if (url.includes('secondpost')) {
+  // console.log({url, indexUrl, currentPath: currentDir, pathname: u.pathname, relativePath  });
+  // }
+  return relativePath;
 };
