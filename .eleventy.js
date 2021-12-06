@@ -5,8 +5,7 @@ const pluginSyntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 const pluginNavigation = require("@11ty/eleventy-navigation");
 const markdownIt = require("markdown-it");
 const markdownItAnchor = require("markdown-it-anchor");
-
-const { urlMaybeRelative } = require("./relativeUrl");
+const relativeUrl = require("eleventy-filter-relative-url");
 
 module.exports = function(eleventyConfig) {
   // Add plugins
@@ -21,7 +20,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
 
   // Use relative URLs where possible.
-  eleventyConfig.addFilter("url", urlMaybeRelative);
+  eleventyConfig.addFilter("url", relativeUrl);
   
   eleventyConfig.addFilter("readableDate", dateObj => {
     return DateTime.fromJSDate(dateObj, {zone: 'utc'}).toFormat("dd LLL yyyy");
